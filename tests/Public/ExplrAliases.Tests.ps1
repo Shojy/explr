@@ -18,22 +18,22 @@ Describe 'Enable-ExplrAliases / Disable-ExplrAliases' {
         $cmd.Definition | Should -Match 'Set-Location'
     }
 
-    It 'creates a global ls wrapper that opens explr only when called bare' {
+    It 'does not touch ls' {
+        # ls override was deliberately removed: explr's own -ListOnly view replaces the need for it.
+        $before = Get-Command -Name ls -CommandType Function -ErrorAction SilentlyContinue
         Enable-ExplrAliases
-        $cmd = Get-Command -Name ls -CommandType Function -ErrorAction SilentlyContinue
-        $cmd | Should -Not -BeNullOrEmpty
-        $cmd.Definition | Should -Match 'Invoke-Explr -ListOnly'
-        $cmd.Definition | Should -Match 'Get-ChildItem'
+        $after = Get-Command -Name ls -CommandType Function -ErrorAction SilentlyContinue
+        # Whatever ls was before Enable should still be exactly that after Enable.
+        if ($null -eq $before) { $after | Should -BeNullOrEmpty }
+        else { $after.Definition | Should -Be $before.Definition }
     }
 
-    It 'removes both wrapper functions on Disable' {
+    It 'removes the cd wrapper function on Disable' {
         Enable-ExplrAliases
         Disable-ExplrAliases
-        # Both wrappers should be gone; the original AllScope aliases re-surface in command resolution.
+        # The wrapper should be gone; the original AllScope cd alias re-surfaces in command resolution.
         $cdFn = Get-Command -Name cd -CommandType Function -ErrorAction SilentlyContinue
-        $lsFn = Get-Command -Name ls -CommandType Function -ErrorAction SilentlyContinue
         $cdFn | Should -BeNullOrEmpty
-        $lsFn | Should -BeNullOrEmpty
     }
 
     It 'warns when Disable is called twice' {

@@ -1,7 +1,7 @@
 function Disable-ExplrAliases {
     <#
     .SYNOPSIS
-        Restores the cd/ls aliases captured by Enable-ExplrAliases.
+        Restores the cd alias captured by Enable-ExplrAliases.
     #>
     [CmdletBinding()]
     param(
@@ -13,25 +13,18 @@ function Disable-ExplrAliases {
         return
     }
 
-    # Remove the wrapper functions. Note: from inside a module, 'Function:Global:cd' does NOT
-    # remove the actually-global function. Plain 'Function:<name>' walks the same provider drive
-    # and removes the function we created via New-Item -Path 'Function:Global:<name>'. Removing
-    # the wrapper lets the original AllScope cd/ls aliases re-surface in command resolution.
-    foreach ($name in 'cd', 'ls') {
-        Remove-Item -Path "Function:$name" -ErrorAction SilentlyContinue
-    }
+    # Remove the wrapper function. Note: from inside a module, 'Function:Global:cd' does NOT
+    # remove the actually-global function. Plain 'Function:cd' walks the same provider drive and
+    # removes the function we created via New-Item -Path 'Function:Global:cd'.
+    Remove-Item -Path 'Function:cd' -ErrorAction SilentlyContinue
 
-    # If the original cd/ls were ever something other than the default AllScope aliases (rare),
-    # restore them explicitly. The common case (default aliases) needs no further action.
-    foreach ($name in 'cd', 'ls') {
-        $orig = $script:OriginalAliases[$name]
-        if ($null -ne $orig -and $orig.Kind -eq 'Alias') {
-            $current = Get-Alias -Name $name -ErrorAction SilentlyContinue
-            if ($null -eq $current -or $current.Definition -ne $orig.Definition) {
-                $opt = if ($null -ne $orig.Options) { $orig.Options } else { [System.Management.Automation.ScopedItemOptions]::AllScope }
-                Set-Alias -Name $name -Value $orig.Definition -Scope $Scope -Force -Option $opt
-            }
-        }
+    # Recreate the original cd alias. Enable-ExplrAliases removed it (since aliases beat
+    # functions in command resolution), so it cannot re-surface on its own — we have to put it
+    # back from the snapshot.
+    $orig = $script:OriginalAliases['cd']
+    if ($null -ne $orig -and $orig.Kind -eq 'Alias') {
+        $opt = if ($null -ne $orig.Options) { $orig.Options } else { [System.Management.Automation.ScopedItemOptions]::AllScope }
+        Set-Alias -Name 'cd' -Value $orig.Definition -Scope $Scope -Force -Option $opt
     }
 
     $script:OriginalAliases = $null

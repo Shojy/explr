@@ -50,33 +50,35 @@ explr
 | Type a drive letter + `:` | Jump to that drive root (e.g. `D:`). |
 | Top "current folder" row | Selecting it and pressing Enter commits the current directory. |
 
-## Opt-in `cd` / `ls` Wrappers
+## Opt-in `cd` Wrapper
 
-`explr` does not shadow the built-in `cd` or `ls` by default. To enable:
+`explr` does not shadow the built-in `cd` by default. To enable:
 
 ```powershell
 Enable-ExplrAliases
 ```
 
-This installs wrapper functions for `cd` and `ls`:
+This installs a wrapper function:
 
-- `cd` (no args) opens explr; `cd <path>` falls through to `Set-Location <path>` so scripts and muscle-memory paths still work normally.
-- `ls` (no args) opens explr in `-ListOnly` mode; `ls <path>` falls through to `Get-ChildItem <path>`.
+- `cd` (no args) opens explr.
+- `cd <path>` falls through to `Set-Location <path>` so scripts and muscle-memory paths still work normally.
 
-Restore the originals with:
+`ls` is intentionally not overridden — explr's own dropdown gives you the same icon-coloured listing for navigation, and leaves the standard `ls` alias untouched for scripts and pipelines.
+
+Restore the original `cd` with:
 
 ```powershell
 Disable-ExplrAliases
 ```
 
-To make the wrappers persistent, add this to your `$PROFILE`:
+To make the wrapper persistent, add this to your `$PROFILE`:
 
 ```powershell
 Import-Module explr
 Enable-ExplrAliases
 ```
 
-Caveat: function scoping. `Enable-ExplrAliases` defaults to `-Scope Global` so the wrappers survive function boundaries. Pass `-Scope` to override.
+Caveat: function scoping. `Enable-ExplrAliases` defaults to `-Scope Global` so the wrapper survives function boundaries. Pass `-Scope` to override.
 
 ## Hosts
 
