@@ -16,6 +16,14 @@ The script downloads explr to `~\Documents\PowerShell\Modules\explr\<version>\`,
 $env:EXPLR_CHANNEL = 'beta'; irm https://raw.githubusercontent.com/Shojy/explr/main/install.ps1 | iex
 ```
 
+Update an existing install (pulls the latest contents from the same channel):
+
+```powershell
+irm https://raw.githubusercontent.com/Shojy/explr/main/update.ps1 | iex
+```
+
+If explr isn't installed, the update script prints the install command and offers to run it.
+
 Uninstall:
 
 ```powershell
