@@ -10,9 +10,8 @@ function Enable-ExplrAliases {
 
     # Idempotency: if a snapshot already exists, the previous Enable hasn't been Disabled.
     # Re-snapshotting now would capture explr's own replacements as the "original", permanently
-    # breaking restore. Bail with a warning instead.
+    # breaking restore. Silently no-op so a profile that re-runs Enable-ExplrAliases is safe.
     if ($null -ne $script:OriginalAliases) {
-        Write-Warning 'Enable-ExplrAliases: aliases already enabled. Call Disable-ExplrAliases before re-enabling.'
         return
     }
 

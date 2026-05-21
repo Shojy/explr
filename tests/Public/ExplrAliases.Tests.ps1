@@ -44,11 +44,12 @@ Describe 'Enable-ExplrAliases / Disable-ExplrAliases' {
         $warnings.Count | Should -BeGreaterThan 0
     }
 
-    It 'is idempotent: a second Enable does not clobber the snapshot' {
+    It 'is idempotent: a second Enable silently does not clobber the snapshot' {
         Enable-ExplrAliases
         $warnings = @()
         Enable-ExplrAliases -WarningVariable warnings -WarningAction SilentlyContinue
-        $warnings.Count | Should -BeGreaterThan 0
+        # Second Enable must be silent so users can safely re-run it from their profile.
+        $warnings.Count | Should -Be 0
         Disable-ExplrAliases
         # If the snapshot had been clobbered, cd would now point at Invoke-Explr instead of Set-Location.
         $a = Get-Alias -Name cd -Scope Global -ErrorAction SilentlyContinue
